@@ -8,12 +8,12 @@ export enum CellValue {
   SIX,
   SEVEN,
   EIGHT,
-  BOMB,
+  MINE,
 }
 
 export enum CellState {
-  OPEN,
-  VISIBLE,
+  UNKNOWN,
+  CLEARED,
   FLAGGED,
 }
 
