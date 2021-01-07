@@ -7,9 +7,18 @@ interface ButtonProps {
   col: number;
   state: CellState;
   value: CellValue;
+  onClick(rowParam: number, colParam: number): (e: React.MouseEvent) => void;
+  onContextMenu(rowParam: number, colParam: number): any;
 }
 
-const Button: React.FC<ButtonProps> = ({ row, col, state, value }) => {
+const Button: React.FC<ButtonProps> = ({
+  row,
+  col,
+  state,
+  value,
+  onClick,
+  onContextMenu,
+}) => {
   const renderContent = (): React.ReactNode => {
     if (state === CellState.CLEARED) {
       if (value === CellValue.MINE) {
@@ -36,6 +45,8 @@ const Button: React.FC<ButtonProps> = ({ row, col, state, value }) => {
       className={`Button
       ${state === CellState.CLEARED ? "cleared" : ""}
       value-${value}`}
+      onClick={onClick(row, col)}
+      onContextMenu={onContextMenu(row, col)}
     >
       {renderContent()}
     </div>
