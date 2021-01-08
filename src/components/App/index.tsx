@@ -60,8 +60,8 @@ const App: React.FC = () => {
     }
   }, [victory, defeat]);
 
-  const startGame = () => {
-    if (!live) {
+  const startGame = (): void => {
+    if (!live && !victory && !defeat) {
       setLive(true);
     }
   };
@@ -71,21 +71,23 @@ const App: React.FC = () => {
 
     startGame();
 
-    if ([CellState.FLAGGED, CellState.CLEARED].includes(currentCell.state)) {
-      return;
-    }
+    if (live) {
+      if ([CellState.FLAGGED, CellState.CLEARED].includes(currentCell.state)) {
+        return;
+      }
 
-    if (currentCell.value === CellValue.MINE) {
-      currentCell.fatal = true;
-      setDefeat(true);
-    } else if (currentCell.value === CellValue.NONE) {
-      setCells(openMultipleCells(cells, rowParam, colParam));
-    } else {
-      currentCell.state = CellState.CLEARED;
-    }
+      if (currentCell.value === CellValue.MINE) {
+        currentCell.fatal = true;
+        setDefeat(true);
+      } else if (currentCell.value === CellValue.NONE) {
+        setCells(openMultipleCells(cells, rowParam, colParam));
+      } else {
+        currentCell.state = CellState.CLEARED;
+      }
 
-    if (!defeat) {
-      checkForVictory();
+      if (!defeat) {
+        checkForVictory();
+      }
     }
   };
 
@@ -96,20 +98,22 @@ const App: React.FC = () => {
 
     startGame();
 
-    const currentCell = cells[rowParam][colParam];
-    if (currentCell.state === CellState.CLEARED) {
-      return;
-    }
+    if (live) {
+      const currentCell = cells[rowParam][colParam];
+      if (currentCell.state === CellState.CLEARED) {
+        return;
+      }
 
-    if (availableFlags > 0 && currentCell.state === CellState.UNKNOWN) {
-      currentCell.state = CellState.FLAGGED;
-      setAvailableFlags(availableFlags - 1);
-    } else if (currentCell.state === CellState.FLAGGED) {
-      currentCell.state = CellState.UNKNOWN;
-      setAvailableFlags(availableFlags + 1);
-    }
+      if (availableFlags > 0 && currentCell.state === CellState.UNKNOWN) {
+        currentCell.state = CellState.FLAGGED;
+        setAvailableFlags(availableFlags - 1);
+      } else if (currentCell.state === CellState.FLAGGED) {
+        currentCell.state = CellState.UNKNOWN;
+        setAvailableFlags(availableFlags + 1);
+      }
 
-    checkForVictory();
+      checkForVictory();
+    }
   };
 
   const handleFaceClick = (): void => {
