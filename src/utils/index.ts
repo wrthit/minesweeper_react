@@ -39,7 +39,7 @@ const getAdjacentCells = (
   return adjacentCells;
 };
 
-export const generateCells = (): Cell[][] => {
+const initCells = (): Cell[][] => {
   let cells: Cell[][] = [];
 
   for (let row = 0; row < MAX_ROWS; row++) {
@@ -48,10 +48,15 @@ export const generateCells = (): Cell[][] => {
       cells[row].push({
         value: CellValue.NONE,
         state: CellState.UNKNOWN,
+        fatal: false,
       });
     }
   }
 
+  return cells;
+};
+
+const randomlyPlaceMines = (cells: Cell[][]): void => {
   let minesPlaced = 0;
 
   while (minesPlaced < NUM_OF_MINES) {
@@ -60,14 +65,13 @@ export const generateCells = (): Cell[][] => {
 
     const currentCell = cells[randomRow][randomCol];
     if (currentCell.value !== CellValue.MINE) {
-      cells[randomRow][randomCol] = {
-        ...currentCell,
-        value: CellValue.MINE,
-      };
+      currentCell.value = CellValue.MINE;
       minesPlaced++;
     }
   }
+};
 
+const populateHints = (cells: Cell[][]): void => {
   for (let rowIndex = 0; rowIndex < MAX_ROWS; rowIndex++) {
     for (let colIndex = 0; colIndex < MAX_COLUMNS; colIndex++) {
       const currentCell = cells[rowIndex][colIndex];
@@ -85,13 +89,20 @@ export const generateCells = (): Cell[][] => {
       });
 
       if (numberOfMines > 0) {
-        cells[rowIndex][colIndex] = {
-          ...currentCell,
-          value: numberOfMines,
-        };
+        currentCell.value = numberOfMines;
       }
     }
   }
+};
+
+const outOfBounds = (row: number, col: number): boolean => {
+  return row < 0 || row >= MAX_ROWS || col < 0 || col >= MAX_COLUMNS;
+};
+
+export const generateCells = (): Cell[][] => {
+  const cells = initCells();
+  randomlyPlaceMines(cells);
+  populateHints(cells);
 
   return cells;
 };
@@ -101,12 +112,7 @@ export const openMultipleCells = (
   rowParam: number,
   colParam: number
 ): Cell[][] => {
-  if (
-    rowParam < 0 ||
-    rowParam >= MAX_ROWS ||
-    colParam < 0 ||
-    colParam >= MAX_COLUMNS
-  ) {
+  if (outOfBounds(rowParam, colParam)) {
     return cells;
   }
 

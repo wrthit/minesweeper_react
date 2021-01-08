@@ -20,6 +20,7 @@ export enum CellState {
 export type Cell = {
   value: CellValue;
   state: CellState;
+  fatal: boolean;
 };
 
 export enum Face {

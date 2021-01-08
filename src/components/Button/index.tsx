@@ -7,6 +7,7 @@ interface ButtonProps {
   col: number;
   state: CellState;
   value: CellValue;
+  fatal: boolean;
   onClick(rowParam: number, colParam: number): (e: React.MouseEvent) => void;
   onContextMenu(rowParam: number, colParam: number): any;
 }
@@ -16,6 +17,7 @@ const Button: React.FC<ButtonProps> = ({
   col,
   state,
   value,
+  fatal,
   onClick,
   onContextMenu,
 }) => {
@@ -44,6 +46,7 @@ const Button: React.FC<ButtonProps> = ({
     <div
       className={`Button
       ${state === CellState.CLEARED ? "cleared" : ""}
+      ${fatal ? "lethalBlow" : ""}
       value-${value}`}
       onClick={onClick(row, col)}
       onContextMenu={onContextMenu(row, col)}
