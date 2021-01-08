@@ -1,6 +1,44 @@
 import { MAX_COLUMNS, MAX_ROWS, NUM_OF_MINES } from "../constants";
 import { CellState, Cell, CellValue } from "../types";
 
+const getAdjacentCells = (
+  cells: Cell[][],
+  rowIndex: number,
+  colIndex: number
+): Cell[] => {
+  let adjacentCells: Cell[] = [];
+
+  if (rowIndex > 0) {
+    if (colIndex > 0) {
+      adjacentCells.push(cells[rowIndex - 1][colIndex - 1]);
+    }
+    if (colIndex < MAX_COLUMNS - 1) {
+      adjacentCells.push(cells[rowIndex - 1][colIndex + 1]);
+    }
+    adjacentCells.push(cells[rowIndex - 1][colIndex]);
+  }
+
+  if (rowIndex < MAX_ROWS - 1) {
+    if (colIndex > 0) {
+      adjacentCells.push(cells[rowIndex + 1][colIndex - 1]);
+    }
+    if (colIndex < MAX_COLUMNS - 1) {
+      adjacentCells.push(cells[rowIndex + 1][colIndex + 1]);
+    }
+    adjacentCells.push(cells[rowIndex + 1][colIndex]);
+  }
+
+  if (colIndex > 0) {
+    adjacentCells.push(cells[rowIndex][colIndex - 1]);
+  }
+
+  if (colIndex < MAX_COLUMNS - 1) {
+    adjacentCells.push(cells[rowIndex][colIndex + 1]);
+  }
+
+  return adjacentCells;
+};
+
 export const generateCells = (): Cell[][] => {
   let cells: Cell[][] = [];
 
@@ -38,51 +76,13 @@ export const generateCells = (): Cell[][] => {
       }
 
       let numberOfMines = 0;
-      const topLeftCell =
-        rowIndex > 0 && colIndex > 0 ? cells[rowIndex - 1][colIndex - 1] : null;
-      const topCell = rowIndex > 0 ? cells[rowIndex - 1][colIndex] : null;
-      const topRightCell =
-        rowIndex > 0 && colIndex < MAX_COLUMNS - 1
-          ? cells[rowIndex - 1][colIndex + 1]
-          : null;
-      const leftCell = colIndex > 0 ? cells[rowIndex][colIndex - 1] : null;
-      const rightCell =
-        colIndex < MAX_COLUMNS - 1 ? cells[rowIndex][colIndex + 1] : null;
-      const bottomLeftCell =
-        rowIndex < MAX_ROWS - 1 && colIndex > 0
-          ? cells[rowIndex + 1][colIndex - 1]
-          : null;
-      const bottomCell =
-        rowIndex < MAX_ROWS - 1 ? cells[rowIndex + 1][colIndex] : null;
-      const bottomRightCell =
-        rowIndex < MAX_ROWS - 1 && colIndex < MAX_COLUMNS - 1
-          ? cells[rowIndex + 1][colIndex + 1]
-          : null;
 
-      if (topLeftCell?.value === CellValue.MINE) {
-        numberOfMines++;
-      }
-      if (topCell?.value === CellValue.MINE) {
-        numberOfMines++;
-      }
-      if (topRightCell?.value === CellValue.MINE) {
-        numberOfMines++;
-      }
-      if (leftCell?.value === CellValue.MINE) {
-        numberOfMines++;
-      }
-      if (rightCell?.value === CellValue.MINE) {
-        numberOfMines++;
-      }
-      if (bottomLeftCell?.value === CellValue.MINE) {
-        numberOfMines++;
-      }
-      if (bottomCell?.value === CellValue.MINE) {
-        numberOfMines++;
-      }
-      if (bottomRightCell?.value === CellValue.MINE) {
-        numberOfMines++;
-      }
+      const adjacentCells = getAdjacentCells(cells, rowIndex, colIndex);
+      adjacentCells.forEach((cell) => {
+        if (cell.value === CellValue.MINE) {
+          numberOfMines++;
+        }
+      });
 
       if (numberOfMines > 0) {
         cells[rowIndex][colIndex] = {
@@ -91,6 +91,49 @@ export const generateCells = (): Cell[][] => {
         };
       }
     }
+  }
+
+  return cells;
+};
+
+export const openMultipleCells = (
+  cells: Cell[][],
+  rowParam: number,
+  colParam: number
+): Cell[][] => {
+  if (
+    rowParam < 0 ||
+    rowParam >= MAX_ROWS ||
+    colParam < 0 ||
+    colParam >= MAX_COLUMNS
+  ) {
+    return cells;
+  }
+
+  const currentCell = cells[rowParam][colParam];
+
+  if (currentCell.value === CellValue.MINE) {
+    return cells;
+  } else if (currentCell.state === CellState.UNKNOWN) {
+    currentCell.state = CellState.CLEARED;
+
+    if (currentCell.value !== CellValue.NONE) {
+      return cells;
+    }
+
+    const rowMinusOne = rowParam - 1;
+    const rowPlusOne = rowParam + 1;
+    const colMinusOne = colParam - 1;
+    const colPlusOne = colParam + 1;
+
+    openMultipleCells(cells, rowMinusOne, colMinusOne);
+    openMultipleCells(cells, rowMinusOne, colParam);
+    openMultipleCells(cells, rowMinusOne, colPlusOne);
+    openMultipleCells(cells, rowParam, colMinusOne);
+    openMultipleCells(cells, rowParam, colPlusOne);
+    openMultipleCells(cells, rowPlusOne, colMinusOne);
+    openMultipleCells(cells, rowPlusOne, colParam);
+    openMultipleCells(cells, rowPlusOne, colPlusOne);
   }
 
   return cells;

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import "./App.scss";
 import NumberDisplay from "../NumberDisplay";
-import { generateCells } from "../../utils";
+import { generateCells, openMultipleCells } from "../../utils";
 import Button from "../Button";
-import { Cell, CellState, Face } from "../../types";
+import { Cell, CellState, CellValue, Face } from "../../types";
 import { NUM_OF_MINES } from "../../constants";
 
 const App: React.FC = () => {
@@ -44,8 +44,24 @@ const App: React.FC = () => {
   }, [live, time]);
 
   const handleCellClick = (rowParam: number, colParam: number) => () => {
+    const currentCell = cells[rowParam][colParam];
+
     if (!live) {
       setLive(true);
+    }
+
+    if ([CellState.FLAGGED, CellState.CLEARED].includes(currentCell.state)) {
+      return;
+    }
+
+    if (currentCell.value === CellValue.MINE) {
+    } else if (currentCell.value === CellValue.NONE) {
+      setCells(openMultipleCells(cells, rowParam, colParam));
+    } else {
+      cells[rowParam][colParam] = {
+        ...cells[rowParam][colParam],
+        state: CellState.CLEARED,
+      };
     }
   };
 
